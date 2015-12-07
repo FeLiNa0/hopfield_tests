@@ -1,3 +1,4 @@
+import math
 from statistics import stdev, mean
 
 import pylab
@@ -98,6 +99,23 @@ class HopfieldTest(object):
             boot[pat]["closest"] = count_matches(boot[pat]["closest"])
         return boot
 
+    def get_summary(boot):
+        f = []
+        i = a = s = 0
+        for pat in boot.keys():
+            i += boot[pat]["iterations"][0]
+            f.append(boot[pat]["full_matches"])
+            a += boot[pat]["accuracy"][0]
+            s += boot[pat]["accuracy"][1] ** 2
+        summary = {}
+        n = len(boot.keys())
+        summary["accuracy_std"] = math.sqrt(s)
+        summary["iterations"]   = i / n
+        summary["full_matches"] = mean(f)
+        summary["full_matches_std"] = stdev(f)
+        summary["accuracy"]     = a / n
+        return summary
+
     @staticmethod
     def test_many(sizes, mk_test, run_test, sample_sizes, noises):
         r = []
@@ -106,6 +124,7 @@ class HopfieldTest(object):
             for noise in noises:
                 noise = noise / 100
                 boot = run_test(h, sz, noise)
+                boot["summary"] = HopfieldTest.get_summary(boot)
                 boot["noise"] = noise
                 boot["size"] = sz
                 r.append(boot)
@@ -137,7 +156,7 @@ class OrthoTest(HopfieldTest):
         self.show_matrix(self.W, "W_matrix")
 
     @staticmethod
-    def test_many(sizes=range(2,8), sample_size=300, noises=range(0, 15, 2)):
+    def test_many(sizes=[(7,25), (7,15), (7,10), (6,5), (6,10), (6,15), (5, 3)], sample_size=300, noises=range(0, 15, 2)):
         def mk_test(size):
             return OrthoTest(logsize=size[0], nvectors=size[1])
         def run_test(h, size, noise):
@@ -229,7 +248,30 @@ def random_flip(bits, n):
 
 
 if __name__ == "__main__":
-    g = OrthoTest()
+    # def test_many(sizes=range(2,8), sample_size=300, noises=range(0, 15, 2)):
+    results = OrthoTest.test_many(sizes=[(5,3), (5,5), (5,10)], sample_size=100, noises=[0, 5, 25])
+    notfirst = False
+    for b in results:
+        s = b["summary"]
+        s["accuracy"] *= 100
+        s["accuracy_std"] *= 100
+        s["full_matches"] *= 100 / b["size"][0]
+        s["full_matches_std"] *= 100 / b["size"][0]
+        b["mem"] = b["size"][1]
+        b["size"] = b["size"][0]
+
+        print(("\n{:3d}, {:3d} --- {:4.1f}%" if notfirst else
+                "\nvector size {}, vectors in memory {} --- "
+              + " randomly flipped {:.0f}% of bits").format(\
+                b["size"], b["mem"], b["noise"]))
+        if not notfirst:
+            print("\tmatched, nearly matched, mean iterations to convergence")
+        print("\t({:6.2f} ± {:6.2f})%, ({:6.2f} ± {:6.2f})% -- {:4.2f}".format(
+            s["full_matches"], s["full_matches_std"],
+            s["accuracy"], s["accuracy_std"], s["iterations"]))
+        notfirst = True
+
+
     # results = GlyphTest.test_dataset("abc")
     # for r in results:
     #     print(r["description"])

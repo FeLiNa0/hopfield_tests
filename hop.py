@@ -1,3 +1,6 @@
+# From
+# https://pmatigakis.wordpress.com/2014/01/18/character-recognition-using-hopfield-networks/
+
 from numpy import *
 def train(patterns):
     """Create a weight matrix for a Hopfield network based on the given patterns."""
