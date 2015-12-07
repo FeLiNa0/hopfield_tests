@@ -1,7 +1,7 @@
 Hopfield Network Performance Tests
 ==================================
 
-Hopfield Networks are recursive neural networks that model human memory. Although commonly referenced for their clear theory, see the bibliography for that. Instead, the programs here can be used to test the recall effectiveness of Hopfield Networks. A sample dataset composed of the Walsh vectors, an orthogonal system is included by default.
+Hopfield Networks are recursive neural networks that function as content-addressable memory. Although commonly referenced for their clear theory, it is best to see the bibliography for that. Instead, the programs here can be used to test the recall effectiveness of Hopfield Networks. A sample dataset composed of the Walsh vectors, an orthogonal system is included by default.
 
 How to install
 --------------
